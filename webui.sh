@@ -70,8 +70,8 @@ then
     LAUNCH_SCRIPT="launch.py"
 fi
 
-# this script cannot be run as root by default
-can_run_as_root=0
+# Allow running as root by default
+can_run_as_root=1
 
 # read any command line flags to the webui.sh script
 while getopts "f" flag > /dev/null 2>&1
@@ -96,18 +96,10 @@ printf "\e[1m\e[32mInstall script for stable-diffusion + Web UI\n"
 printf "\e[1m\e[34mTested on Debian 11 (Bullseye), Fedora 34+ and openSUSE Leap 15.4 or newer.\e[0m"
 printf "\n%s\n" "${delimiter}"
 
-# Do not run as root
-if [[ $(id -u) -eq 0 && can_run_as_root -eq 0 ]]
-then
-    printf "\n%s\n" "${delimiter}"
-    printf "\e[1m\e[31mERROR: This script must not be launched as root, aborting...\e[0m"
-    printf "\n%s\n" "${delimiter}"
-    exit 1
-else
-    printf "\n%s\n" "${delimiter}"
-    printf "Running on \e[1m\e[32m%s\e[0m user" "$(whoami)"
-    printf "\n%s\n" "${delimiter}"
-fi
+# Print current user details
+printf "\n%s\n" "${delimiter}"
+printf "Running on \e[1m\e[32m%s\e[0m user" "$(whoami)"
+printf "\n%s\n" "${delimiter}"
 
 if [[ $(getconf LONG_BIT) = 32 ]]
 then
@@ -167,7 +159,7 @@ if ! echo "$gpu_info" | grep -q "NVIDIA";
 then
     if echo "$gpu_info" | grep -q "AMD" && [[ -z "${TORCH_COMMAND}" ]]
     then
-	      export TORCH_COMMAND="pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.7"
+          export TORCH_COMMAND="pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.7"
     elif npu-smi info 2>/dev/null
     then
         export TORCH_COMMAND="pip install torch==2.1.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu; pip install torch_npu==2.1.0"
